@@ -165,9 +165,8 @@ export default function DreamPage() {
                 </div>
               )}
               <div
-                className={`${
-                  restoredLoaded ? "visible mt-6 -ml-8" : "invisible"
-                }`}
+                className={`${restoredLoaded ? "visible mt-6 -ml-8" : "invisible"
+                  }`}
               >
                 <Toggle
                   className={`${restoredLoaded ? "visible mb-6" : "invisible"}`}
@@ -268,7 +267,6 @@ export default function DreamPage() {
           </AnimatePresence>
         </ResizablePanel>
       </main>
-      <Footer />
     </div>
   );
 }
