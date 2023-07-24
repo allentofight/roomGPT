@@ -27,6 +27,7 @@ const options = {
   maxFileCount: 1,
   mimeTypes: ["image/jpeg", "image/png", "image/jpg"],
   editor: { images: { crop: false } },
+  locale: { "uploadImage": "点击上传图片", "orDragDropImage": "或拖拽图片", },
   styles: {
     colors: {
       primary: "#2563EB", // Primary buttons & links
@@ -52,8 +53,8 @@ export default function DreamPage() {
   const [sideBySide, setSideBySide] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [photoName, setPhotoName] = useState<string | null>(null);
-  const [theme, setTheme] = useState<themeType>("Modern");
-  const [room, setRoom] = useState<roomType>("Living Room");
+  const [theme, setTheme] = useState<themeType>("现代");
+  const [room, setRoom] = useState<roomType>("客厅");
 
   const UploadDropZone = () => (
     <UploadDropzone
@@ -72,6 +73,29 @@ export default function DreamPage() {
   );
 
   async function generatePhoto(fileUrl: string) {
+
+    const themStyles = {
+      "现代": "Modern",
+      "复古": "Vintage",
+      "简约": "Minimalist",
+      "专业": "Professional",
+      "热带": "Tropical",
+      "沿海": "Coastal",
+      "工业": "Industrial",
+      "新古典": "Neoclassic",
+      "部落": "Tribal"
+    };
+
+    const roomTypes = {
+      "客厅": "Living Room",
+      "餐厅": "Dining Room",
+      "卧室": "Bedroom",
+      "浴室": "Bathroom",
+      "办公室": "Office",
+      "游戏室": "Gaming Room"
+    };
+
+
     await new Promise((resolve) => setTimeout(resolve, 200));
     setLoading(true);
     const res = await fetch("/generate", {
@@ -79,7 +103,7 @@ export default function DreamPage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ imageUrl: fileUrl, theme, room }),
+      body: JSON.stringify({ imageUrl: fileUrl, theme: themStyles[theme], room: roomTypes[room] }),
     });
 
     let newPhoto = await res.json();
@@ -98,7 +122,7 @@ export default function DreamPage() {
       <Header />
       <main className="flex flex-1 w-full flex-col items-center justify-center text-center px-4 mt-4 sm:mb-0 mb-8">
         <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-5">
-          Generate your <span className="text-blue-600">dream</span> room
+          生成你的 <span className="text-blue-600">梦幻</span> 装修吧
         </h1>
         <ResizablePanel>
           <AnimatePresence mode="wait">
@@ -114,7 +138,7 @@ export default function DreamPage() {
                         alt="1 icon"
                       />
                       <p className="text-left font-medium">
-                        Choose your room theme.
+                        选择你的房间主题。
                       </p>
                     </div>
                     <DropDown
@@ -134,7 +158,7 @@ export default function DreamPage() {
                         alt="1 icon"
                       />
                       <p className="text-left font-medium">
-                        Choose your room type.
+                        选择你的房间类型。
                       </p>
                     </div>
                     <DropDown
@@ -152,7 +176,7 @@ export default function DreamPage() {
                         alt="1 icon"
                       />
                       <p className="text-left font-medium">
-                        Upload a picture of your room.
+                        请上传一张你房间的图片
                       </p>
                     </div>
                   </div>
@@ -193,7 +217,7 @@ export default function DreamPage() {
               {restoredImage && originalPhoto && !sideBySide && (
                 <div className="flex sm:space-x-4 sm:flex-row flex-col">
                   <div>
-                    <h2 className="mb-1 font-medium text-lg">Original Room</h2>
+                    <h2 className="mb-1 font-medium text-lg">原图</h2>
                     <Image
                       alt="original photo"
                       src={originalPhoto}
@@ -203,7 +227,7 @@ export default function DreamPage() {
                     />
                   </div>
                   <div className="sm:mt-0 mt-8">
-                    <h2 className="mb-1 font-medium text-lg">Generated Room</h2>
+                    <h2 className="mb-1 font-medium text-lg">生成图</h2>
                     <a href={restoredImage} target="_blank" rel="noreferrer">
                       <Image
                         alt="restored photo"
@@ -246,7 +270,7 @@ export default function DreamPage() {
                     }}
                     className="bg-blue-500 rounded-full text-white font-medium px-4 py-2 mt-8 hover:bg-blue-500/80 transition"
                   >
-                    Generate New Room
+                    生成新图
                   </button>
                 )}
                 {restoredLoaded && (
@@ -259,7 +283,7 @@ export default function DreamPage() {
                     }}
                     className="bg-white rounded-full text-black border font-medium px-4 py-2 mt-8 hover:bg-gray-100 transition"
                   >
-                    Download Generated Room
+                    下载生成图
                   </button>
                 )}
               </div>
