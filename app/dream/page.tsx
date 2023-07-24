@@ -217,8 +217,7 @@ export default function DreamPage() {
               )}
               {restoredImage && (
                 <div>
-                  Here's your remodeled <b>{room.toLowerCase()}</b> in the{" "}
-                  <b>{theme.toLowerCase()}</b> theme!{" "}
+                  这是按照<b>{theme.toLowerCase()}</b>主题重新装修的<b>{room.toLowerCase()}</b>
                 </div>
               )}
               <div
