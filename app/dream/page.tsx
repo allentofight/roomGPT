@@ -113,7 +113,7 @@ export default function DreamPage() {
       "简约": "Minimalist",
       "专业": "Professional",
       "热带": "Tropical",
-      "沿海": "Coastal",
+      "海岸": "Coastal",
       "工业": "Industrial",
       "新古典": "Neoclassic",
       "部落": "Tribal"
