@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { UploadDropzone } from "react-uploader";
 import { Uploader } from "uploader";
-import { CompareSlider } from "../../components/CompareSlider";
-import Footer from "../../components/Footer";
 import Header from "../../components/Header";
 import LoadingDots from "../../components/LoadingDots";
 import ResizablePanel from "../../components/ResizablePanel";
@@ -89,6 +87,19 @@ export default function DreamPage() {
   const [theme, setTheme] = useState<themeType>("现代");
   const [room, setRoom] = useState<roomType>("客厅");
 
+
+  const [items, setItems] = useState([
+    { label: '现代', imgSrc: '/someimg-modern.webp', restoreImageSrc: '', checked: false },
+    { label: '简约', imgSrc: '/someimg-minimalist.webp', restoreImageSrc: '', checked: false },
+    { label: '专业', imgSrc: '/someimg-professional.webp', restoreImageSrc: '', checked: true },
+    { label: '热带', imgSrc: '/someimg-tropical.webp', restoreImageSrc: '', checked: false },
+    { label: '海岸', imgSrc: '/someimg-coastal.webp', restoreImageSrc: '', checked: false },
+    { label: '复古', imgSrc: '/someimg-vintage.webp', restoreImageSrc: '', checked: false },
+    { label: '工业', imgSrc: '/someimg-industrial.webp', restoreImageSrc: '', checked: false },
+    { label: '新古典', imgSrc: '/someimg-neoclassic.webp', restoreImageSrc: '', checked: false },
+    { label: '部落', imgSrc: '/someimg-tribal.webp', restoreImageSrc: '', checked: false },
+  ]);
+
   const UploadDropZone = () => (
     <UploadDropzone
       uploader={uploader}
@@ -97,7 +108,6 @@ export default function DreamPage() {
         if (file.length !== 0) {
           setPhotoName(file[0].originalFile.originalFileName);
           setOriginalPhoto(file[0].fileUrl.replace("raw", "thumbnail"));
-          generatePhoto(file[0].fileUrl.replace("raw", "thumbnail"));
         }
       }}
       width="670px"
@@ -105,7 +115,7 @@ export default function DreamPage() {
     />
   );
 
-  async function generatePhoto(fileUrl: string) {
+  async function generatePhoto(fileUrl: string, label: string) {
 
     const themStyles = {
       "现代": "Modern",
@@ -143,186 +153,183 @@ export default function DreamPage() {
     if (res.status !== 200) {
       setError(newPhoto);
     } else {
-      setRestoredImage(newPhoto[1]);
+      setItems(prevItems => {
+        return prevItems.map((item, i) =>
+          item.label === label ? { ...item, restoreImageSrc: newPhoto[1] } : item
+        );
+      });
     }
     setTimeout(() => {
       setLoading(false);
     }, 1300);
   }
 
+  const checkedCount = items.filter(item => item.checked).length;
+
+  const checkedItems = items.filter(item => item.checked);
+
+  const gridClasses = checkedCount === 1 ? 'lg:grid-cols-1' : 'lg:grid-cols-2';
+  const maxSelectionReached = checkedCount >= 1;
+
+  const handleClick = (index: number) => {
+    if (items[index].checked || !maxSelectionReached) {
+      setItems(prevItems => {
+        return prevItems.map((item, i) =>
+          i === index ? { ...item, checked: !item.checked } : item
+        );
+      });
+    }
+  };
+
+
   return (
     <div className="flex max-w-6xl mx-auto flex-col items-center justify-center py-2 min-h-screen">
       <Header />
-      <main className="flex flex-1 w-full flex-col items-center justify-center text-center px-4 mt-4 sm:mb-0 mb-8">
-        <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-5">
-          生成你的 <span className="text-blue-600">梦幻</span> 装修吧
-        </h1>
-        <ResizablePanel>
-          <AnimatePresence mode="wait">
-            <motion.div className="flex justify-between items-center w-full flex-col mt-4">
-              {!restoredImage && (
-                <>
-                  <div className="space-y-4 w-full max-w-sm">
-                    <div className="flex mt-3 items-center space-x-3">
-                      <Image
-                        src="/number-1-white.svg"
-                        width={30}
-                        height={30}
-                        alt="1 icon"
-                      />
-                      <p className="text-left font-medium">
-                        选择你的房间主题。
-                      </p>
-                    </div>
-                    <DropDown
-                      theme={theme}
-                      setTheme={(newTheme) =>
-                        setTheme(newTheme as typeof theme)
-                      }
-                      themes={themes}
-                    />
-                  </div>
-                  <div className="space-y-4 w-full max-w-sm">
-                    <div className="flex mt-10 items-center space-x-3">
-                      <Image
-                        src="/number-2-white.svg"
-                        width={30}
-                        height={30}
-                        alt="1 icon"
-                      />
-                      <p className="text-left font-medium">
-                        选择你的房间类型。
-                      </p>
-                    </div>
-                    <DropDown
-                      theme={room}
-                      setTheme={(newRoom) => setRoom(newRoom as typeof room)}
-                      themes={rooms}
-                    />
-                  </div>
-                  <div className="mt-4 w-full max-w-sm">
-                    <div className="flex mt-6 w-96 items-center space-x-3">
-                      <Image
-                        src="/number-3-white.svg"
-                        width={30}
-                        height={30}
-                        alt="1 icon"
-                      />
-                      <p className="text-left font-medium">
-                        请上传一张你房间的图片
-                      </p>
-                    </div>
-                  </div>
-                </>
-              )}
-              {restoredImage && (
-                <div>
-                  这是按照<b>{theme.toLowerCase()}</b>主题重新装修的<b>{room.toLowerCase()}</b>
-                </div>
-              )}
+      <main className="flex flex-1 w-full justify-center text-center px-4 mt-4 sm:mb-0 mb-8 sm:space-x-8 space-x-0 sm:flex-row flex-col">
+        <div className="sm:w-[440px] w-full flex flex-col gap-3 py-4 p-3">
+          {/* <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div> */}
+          <div className="font-bold">
+            点击上传一张你房间的图片
+          </div>
+          {!originalPhoto && <UploadDropZone />}
+          {originalPhoto && (
+            <Image
+              loading="lazy"
+              decoding="async"
+              data-nimg="1"
+              alt="original photo"
+              src={originalPhoto}
+              className="rounded-lg"
+              width={350}
+              height={350}
+              style={{ color: 'transparent' }}
+            />
+          )}
+          <div className="font-bold">
+            选择房间类型
+          </div>
+          <DropDown
+            theme={room}
+            setTheme={(newRoom) =>
+              setRoom(newRoom as typeof room)
+            }
+            themes={rooms}
+          />
+          <div className="font-bold mt-4 mb-2">
+            选择房间主题 (最多可以选1个)
+          </div>
+          <div className="grid grid-cols-3 grid-rows-3 gap-2 mb-6">
+            {items.map((item, index) => (
               <div
-                className={`${restoredLoaded ? "visible mt-6 -ml-8" : "invisible"
-                  }`}
+                className="flex flex-col space-y-2 items-center"
+                key={index}
               >
-                <Toggle
-                  className={`${restoredLoaded ? "visible mb-6" : "invisible"}`}
-                  sideBySide={sideBySide}
-                  setSideBySide={(newVal) => setSideBySide(newVal)}
-                />
-              </div>
-              {restoredLoaded && sideBySide && (
-                <CompareSlider
-                  original={originalPhoto!}
-                  restored={restoredImage!}
-                />
-              )}
-              {!originalPhoto && <UploadDropZone />}
-              {originalPhoto && !restoredImage && (
-                <Image
-                  alt="original photo"
-                  src={originalPhoto}
-                  className="rounded-2xl h-96"
-                  width={475}
-                  height={475}
-                />
-              )}
-              {restoredImage && originalPhoto && !sideBySide && (
-                <div className="flex sm:space-x-4 sm:flex-row flex-col">
-                  <div>
-                    <h2 className="mb-1 font-medium text-lg">原图</h2>
-                    <Image
-                      alt="original photo"
-                      src={originalPhoto}
-                      className="rounded-2xl relative w-full h-96"
-                      width={475}
-                      height={475}
-                    />
-                  </div>
-                  <div className="sm:mt-0 mt-8">
-                    <h2 className="mb-1 font-medium text-lg">生成图</h2>
-                    <a href={restoredImage} target="_blank" rel="noreferrer">
-                      <Image
-                        alt="restored photo"
-                        src={restoredImage}
-                        className="rounded-2xl relative sm:mt-0 mt-2 cursor-zoom-in w-full h-96"
-                        width={475}
-                        height={475}
-                        onLoadingComplete={() => setRestoredLoaded(true)}
-                      />
-                    </a>
-                  </div>
-                </div>
-              )}
-              {loading && (
                 <button
-                  disabled
-                  className="bg-blue-500 rounded-full text-white font-medium px-4 pt-2 pb-3 mt-8 w-40"
+                  style={{
+                    cursor: item.checked || !maxSelectionReached ? 'pointer' : 'not-allowed',
+                  }}
+                  onClick={() => !maxSelectionReached || item.checked ? handleClick(index) : null}
                 >
-                  <span className="pt-4">
-                    <LoadingDots color="white" style="large" />
-                  </span>
+                  <div className="relative">
+                    {item.checked && (
+                      <div className="absolute bg-black rounded-md right-1 top-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-check">
+                          <path d="M20 6L9 17 4 12"></path>
+                        </svg>
+                      </div>
+                    )}
+                    <Image alt="" loading="lazy" width="100" height="100" decoding="async" data-nimg="1" className={`w-24 h-24 rounded-md ${item.checked ? 'border-2 border-white -p-2' : ''}`} src={item.imgSrc} style={{ color: 'transparent' }} />
+
+                  </div>
                 </button>
-              )}
-              {error && (
-                <div
-                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mt-8"
-                  role="alert"
-                >
-                  <span className="block sm:inline">{error}</span>
+                <div className="text-sm pb-2">
+                  {item.label}
                 </div>
-              )}
-              <div className="flex space-x-2 justify-center">
-                {originalPhoto && !loading && (
-                  <button
-                    onClick={() => {
-                      setOriginalPhoto(null);
-                      setRestoredImage(null);
-                      setRestoredLoaded(false);
-                      setError(null);
-                    }}
-                    className="bg-blue-500 rounded-full text-white font-medium px-4 py-2 mt-8 hover:bg-blue-500/80 transition"
-                  >
-                    生成新图
-                  </button>
-                )}
-                {restoredLoaded && (
-                  <button
-                    onClick={() => {
-                      downloadPhoto(
-                        restoredImage!,
-                        appendNewToName(photoName!)
-                      );
-                    }}
-                    className="bg-white rounded-full text-black border font-medium px-4 py-2 mt-8 hover:bg-gray-100 transition"
-                  >
-                    下载生成图
-                  </button>
-                )}
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </ResizablePanel>
-      </main>
-    </div>
+            ))}
+          </div>
+          <div className="justify-center flex items-center space-x-5">
+            {!loading &&
+              <>
+                <button
+                  type="button"
+                  style={{
+                    cursor: originalPhoto && checkedCount > 0 ? 'pointer' : 'not-allowed',
+                  }}
+                  className="inline-flex items-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-3 font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 justify-between disabled:cursor-not-allowed false"
+                  onClick={() => {
+
+                    if (!originalPhoto) {
+                      alert('请先上传图片')
+                      return
+                    }
+
+                    for (let index = 0; index < checkedItems.length; index++) {
+                      const item = checkedItems[index];
+                      generatePhoto(originalPhoto, item.label)
+                    }
+
+                  }}><span>开始设计</span></button>
+                <span className="px-2 rounded-md" aria-hidden="true">剩余 <span className="font-bold">2 张</span></span>
+              </>
+            }
+
+            {loading &&
+              <button
+                type="button"
+                className="inline-flex items-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-2 font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-blue-600 justify-center cursor-not-allowed"
+                disabled={true}
+              >
+                <span
+                  className="bg-blue-900 px-2 rounded-md text-sm "
+                  aria-hidden="true"
+                >
+                  Using 1 credit
+                </span>
+                <span>
+                  <LoadingDots color="white" style="large" />
+                </span>
+              </button>
+            }
+          </div>
+        </div>
+        <div className="w-[-webkit-fill-available] px-3 md:mt-8 mt-0">
+          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-5 hidden lg:block">几秒钟内重新设计你的 <span className="text-blue-600">房间</span></h1>
+          <p className="text-gray-400 hidden lg:block">开始上传照片，指定房间类型，选择房间主题，然后提交。
+          </p>
+          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-3 sm:hidden visible mt-4" id="rendered-designs">Rendered designs</h1>
+          <div className={`sm:p-8 p-0 pr-0 grid grid-cols-1 gap-10 sm:mt-0 mt-10 place-items-center ${gridClasses}`}>
+            {items.map((item, index) => {
+              return item.checked &&
+                <>
+                  {
+                    !item.restoreImageSrc.length &&
+                    <div className="w-full" key={index}>
+                      <div className="bg-gray-600 max-w-[402px] h-[312px] rounded-lg flex justify-center items-center mx-auto">
+                        <Image alt="logo" loading="lazy" width="50" height="50" decoding="async" data-nimg="1" src="/couch.svg" style={{ color: 'transparent' }} />
+                      </div>
+                      <p className="text-gray-400 mt-1">{item.label}</p>
+                    </div>
+                  }
+                  {
+                    item.restoreImageSrc.length > 0 &&
+                    <div>
+                      <div className="rounded-lg flex justify-center items-center">
+                        <Image alt="" className="w-[614px] h-[410px] rounded-lg" loading="lazy" decoding="async" data-nimg="1" src={item.restoreImageSrc} width={500}
+                          height={400} style={{ color: 'transparent' }} />
+                      </div>
+                      <p className="text-gray-400 mt-1">{item.label}</p>
+                    </div>
+                  }
+
+                </>
+            })}
+
+          </div>
+        </div>
+        <div style={{ position: 'fixed', zIndex: 9999, inset: '16px', pointerEvents: 'none' }}>
+        </div>
+      </main >
+    </div >
   );
 }
