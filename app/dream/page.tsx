@@ -115,7 +115,7 @@ export default function DreamPage() {
     />
   );
 
-  async function generatePhoto(fileUrl: string, label: string) {
+  async function generatePhoto(fileUrl: string, label: themeType) {
 
     const themStyles = {
       "现代": "Modern",
@@ -146,7 +146,7 @@ export default function DreamPage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ imageUrl: fileUrl, theme: themStyles[theme], room: roomTypes[room] }),
+      body: JSON.stringify({ imageUrl: fileUrl, theme: themStyles[label], room: roomTypes[room] }),
     });
 
     let newPhoto = await res.json();
@@ -266,7 +266,7 @@ export default function DreamPage() {
 
                     for (let index = 0; index < checkedItems.length; index++) {
                       const item = checkedItems[index];
-                      generatePhoto(originalPhoto, item.label)
+                      generatePhoto(originalPhoto, item.label as themeType)
                     }
 
                   }}><span>开始设计</span></button>
