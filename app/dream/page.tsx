@@ -206,7 +206,7 @@ export default function DreamPage() {
       <Header />
       <main className="flex flex-1 w-full justify-center text-center px-4 mt-4 sm:mb-0 mb-8 sm:space-x-8 space-x-0 sm:flex-row flex-col">
         <div className="sm:w-[440px] w-full flex flex-col gap-3 py-4 p-3">
-          <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div>
+          {/* <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div> */}
           <div className="font-bold">
             上传一张你房间的图片
           </div>
