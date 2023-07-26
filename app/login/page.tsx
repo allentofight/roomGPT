@@ -138,8 +138,9 @@ export default function LoginForm() {
                         placeholder="验证码"
                         value={code}
                         onInput={(e) => {
-                            setCode(e.target.value);
-                            setSubmitDisabled(!e.target.value); // Update submitDisabled based on the input's value
+                            const target = e.target as HTMLInputElement; // Cast to HTMLInputElement
+                            setCode(target.value);
+                            setSubmitDisabled(!target.value); // Update submitDisabled based on the input's value
                         }}
                     />
                     <button
