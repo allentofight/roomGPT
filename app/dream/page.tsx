@@ -7,6 +7,7 @@ import { UploadDropzone } from "react-uploader";
 import { Uploader } from "uploader";
 import Header from "../../components/Header";
 import LoadingDots from "../../components/LoadingDots";
+import RingLoaindg from "../../components/RingLoaindg";
 import ResizablePanel from "../../components/ResizablePanel";
 import Toggle from "../../components/Toggle";
 import appendNewToName from "../../utils/appendNewToName";
@@ -207,21 +208,34 @@ export default function DreamPage() {
         <div className="sm:w-[440px] w-full flex flex-col gap-3 py-4 p-3">
           <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div>
           <div className="font-bold">
-            点击上传一张你房间的图片
+            上传一张你房间的图片
           </div>
+
           {!originalPhoto && <UploadDropZone />}
           {originalPhoto && (
-            <Image
-              loading="lazy"
-              decoding="async"
-              data-nimg="1"
-              alt="original photo"
-              src={originalPhoto}
-              className="rounded-lg"
-              width={350}
-              height={350}
-              style={{ color: 'transparent' }}
-            />
+            <div className="bg-neutral-800 p-3 rounded-xl">
+              <div className="flex justify-between mb-2 mx-2">
+                <div className="text-sm text-gray-400">原图</div>
+                <button onClick={() => setOriginalPhoto('')}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                    strokeLinecap="round" strokeLinejoin="round" className="feather feather-trash text-[#9ca3af] hover:text-white transition"><path d="M3 6L5 6 21 6"></path><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex justify-center items-center">
+                <Image
+                  loading="lazy"
+                  decoding="async"
+                  data-nimg="1"
+                  alt="original photo"
+                  src={originalPhoto}
+                  className="rounded-lg"
+                  width={350}
+                  height={350}
+                  style={{ color: 'transparent' }}
+                />
+              </div>
+            </div>
           )}
           <div className="font-bold">
             选择房间类型
@@ -302,7 +316,7 @@ export default function DreamPage() {
                   className="bg-blue-900 px-2 rounded-md text-sm "
                   aria-hidden="true"
                 >
-                  Using 1 credit
+                  正在生成
                 </span>
                 <span>
                   <LoadingDots color="white" style="large" />
@@ -324,8 +338,15 @@ export default function DreamPage() {
                     !item.restoreImageSrc.length &&
                     <div className="w-full" key={index}>
                       <div className="bg-gray-600 max-w-[402px] h-[312px] rounded-lg flex justify-center items-center mx-auto">
-                        <Image alt="logo" loading="lazy" width="50" height="50" decoding="async" data-nimg="1" src="/couch.svg" style={{ color: 'transparent' }} />
+                        {!loading &&
+                          <Image alt="logo" loading="lazy" width="50" height="50" decoding="async" data-nimg="1" src="/couch.svg" style={{ color: 'transparent' }} />
+                        }
+
+                        {loading &&
+                          <RingLoaindg />
+                        }
                       </div>
+
                       <p className="text-gray-400 mt-1">{item.label}</p>
                     </div>
                   }
