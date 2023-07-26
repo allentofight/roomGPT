@@ -138,16 +138,6 @@ export default function DreamPage() {
       "游戏室": "Gaming Room"
     };
 
-
-
-    setItems(prevItems => {
-      return prevItems.map((item, i) =>
-        item.label === label ? { ...item, restoreImageSrc: label == '专业' ? 'https://replicate.delivery/pbxt/WwSUaDGeuqxjDCumqmzpv8QoEj5uMP5Ayd4LSweStT4S2iTRA/output_1.png' : 'https://replicate.delivery/pbxt/mlCRJYUrQrrVDxekAKNJdlaGvCY02tHPBdr5W7kuOtyJbxpIA/output_1.png' } : item
-      );
-    });
-    return
-
-
     await new Promise((resolve) => setTimeout(resolve, 200));
     setLoading(true);
     const res = await fetch("/generate", {
