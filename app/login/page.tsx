@@ -27,7 +27,7 @@ export default function LoginForm() {
 
         let sessionId = localStorage.getItem('sessionId')
         if (sessionId) {
-            window.location.href = '/'
+            window.location.href = '/dream'
         }
     }, []);
 
@@ -109,7 +109,7 @@ export default function LoginForm() {
             }
             localStorage.setItem('sessionId', result.sessionId)
             localStorage.setItem('inviteCode', result.inviteCode)
-            window.location.href = '/'
+            window.location.href = '/dream'
 
         } else {
             alert(result.message);
