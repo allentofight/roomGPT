@@ -16,6 +16,22 @@ export default function Header() {
           求未梦幻装修
         </h1>
       </Link>
+      <div className="flex items-center space-x-4">
+        <Link className="border-r border-gray-300 pr-4  space-x-2 hover:text-blue-400 transition hidden sm:flex" href="/buy-credits">
+          <div className="hover:text-blue-500 font-bold underline">价格</div>
+        </Link>
+        <Link className="border-r border-gray-300 pr-4 flex space-x-2 hover:text-blue-400 transition" href="/buy-credits">
+          <div className="underline">
+            剩余<span>2</span>张
+          </div>
+        </Link>
+
+        <button className="inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground py-2 px-4 relative h-10 w-10 rounded-full" type="button" id="radix-:r2:" aria-haspopup="menu" aria-expanded="false" data-state="closed">
+          <span className="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10">
+            <img className="aspect-square h-full w-full" alt="umar faruk lions" src="https://lh3.googleusercontent.com/a/AAcHTtd2xY8LwHDIgPwc_r6KcKBQDlgVbtbYWMSqJ4veylU_=s96-c" />
+          </span>
+        </button>
+      </div>
     </header>
   );
 }

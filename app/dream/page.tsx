@@ -139,6 +139,15 @@ export default function DreamPage() {
     };
 
 
+
+    setItems(prevItems => {
+      return prevItems.map((item, i) =>
+        item.label === label ? { ...item, restoreImageSrc: label == '专业' ? 'https://replicate.delivery/pbxt/WwSUaDGeuqxjDCumqmzpv8QoEj5uMP5Ayd4LSweStT4S2iTRA/output_1.png' : 'https://replicate.delivery/pbxt/mlCRJYUrQrrVDxekAKNJdlaGvCY02tHPBdr5W7kuOtyJbxpIA/output_1.png' } : item
+      );
+    });
+    return
+
+
     await new Promise((resolve) => setTimeout(resolve, 200));
     setLoading(true);
     const res = await fetch("/generate", {
@@ -166,10 +175,12 @@ export default function DreamPage() {
 
   const checkedCount = items.filter(item => item.checked).length;
 
+  const restoreImageCnt = items.filter(item => item.restoreImageSrc.length > 0).length;
+
   const checkedItems = items.filter(item => item.checked);
 
   const gridClasses = checkedCount === 1 ? 'lg:grid-cols-1' : 'lg:grid-cols-2';
-  const maxSelectionReached = checkedCount >= 1;
+  const maxSelectionReached = checkedCount >= 2;
 
   const handleClick = (index: number) => {
     if (items[index].checked || !maxSelectionReached) {
@@ -181,13 +192,30 @@ export default function DreamPage() {
     }
   };
 
+  const handleDownload = () => {
+    for (let index = 0; index < checkedItems.length; index++) {
+      const item = checkedItems[index];
+      downloadPhoto(item.restoreImageSrc, item.label + '-' + room)
+    }
+  }
+
+  const reset = () => {
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index];
+      setItems(prevItems => {
+        return prevItems.map(item => {
+          return { ...item, restoreImageSrc: '' }
+        });
+      });
+    }
+  }
 
   return (
     <div className="flex max-w-6xl mx-auto flex-col items-center justify-center py-2 min-h-screen">
       <Header />
       <main className="flex flex-1 w-full justify-center text-center px-4 mt-4 sm:mb-0 mb-8 sm:space-x-8 space-x-0 sm:flex-row flex-col">
         <div className="sm:w-[440px] w-full flex flex-col gap-3 py-4 p-3">
-          {/* <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div> */}
+          <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div>
           <div className="font-bold">
             点击上传一张你房间的图片
           </div>
@@ -216,7 +244,7 @@ export default function DreamPage() {
             themes={rooms}
           />
           <div className="font-bold mt-4 mb-2">
-            选择房间主题 (最多可以选1个)
+            选择房间主题 (最多可以选2个)
           </div>
           <div className="grid grid-cols-3 grid-rows-3 gap-2 mb-6">
             {items.map((item, index) => (
@@ -294,7 +322,7 @@ export default function DreamPage() {
           </div>
         </div>
         <div className="w-[-webkit-fill-available] px-3 md:mt-8 mt-0">
-          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-5 hidden lg:block">几秒钟内重新设计你的 <span className="text-blue-600">房间</span></h1>
+          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-5xl mb-5 hidden lg:block">几秒钟内重新设计你的 <span className="text-blue-600">房间</span></h1>
           <p className="text-gray-400 hidden lg:block">开始上传照片，指定房间类型，选择房间主题，然后提交。
           </p>
           <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-normal text-slate-100 sm:text-6xl mb-3 sm:hidden visible mt-4" id="rendered-designs">Rendered designs</h1>
@@ -315,8 +343,18 @@ export default function DreamPage() {
                     item.restoreImageSrc.length > 0 &&
                     <div>
                       <div className="rounded-lg flex justify-center items-center">
-                        <Image alt="" className="w-[614px] h-[410px] rounded-lg" loading="lazy" decoding="async" data-nimg="1" src={item.restoreImageSrc} width={500}
-                          height={400} style={{ color: 'transparent' }} />
+                        <Image
+                          alt=""
+                          className="rounded-lg"
+                          loading="lazy"
+                          decoding="async"
+                          data-nimg="1"
+                          src={item.restoreImageSrc}
+                          width={500}
+                          height={400}
+                          fill={false} // 如果你在使用 Next.js，你可以添加这个属性
+                          style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+                        />
                       </div>
                       <p className="text-gray-400 mt-1">{item.label}</p>
                     </div>
@@ -326,6 +364,13 @@ export default function DreamPage() {
             })}
 
           </div>
+          {
+            restoreImageCnt > 0 &&
+            <div className="flex space-x-2 justify-center">
+              <button className="bg-blue-500 rounded-full text-white font-medium px-4 py-2 hover:bg-blue-500/80 transition" onClick={() => reset()}>重置</button>
+              <button className="bg-white rounded-full text-black border font-medium px-4 py-2 hover:bg-gray-300 transition duration-300 ease-in-out" onClick={() => handleDownload()}>下载图片</button>
+            </div>
+          }
         </div>
         <div style={{ position: 'fixed', zIndex: 9999, inset: '16px', pointerEvents: 'none' }}>
         </div>
