@@ -32,9 +32,9 @@ function RingLoading() {
 
         <div className="" data-testid="rings-loading" aria-label="rings-loading" aria-busy="true" role="status" style={{ display: 'flex' }}>
             <svg width="200" height="200" viewBox="0 0 45 45" xmlns="http://www.w3.org/2000/svg" stroke="white" data-testid="rings-svg">
-                <g fill="none" fill-rule="evenodd" transform="translate(1 1)" stroke-width="2">
-                    <motion.circle cx="22" cy="22" r="6" stroke-opacity="0" animate={controls1}></motion.circle>
-                    <motion.circle cx="22" cy="22" r="6" stroke-opacity="0" animate={controls2}></motion.circle>
+                <g fill="none" fillRule="evenodd" transform="translate(1 1)" strokeWidth="2">
+                    <motion.circle cx="22" cy="22" r="6" strokeOpacity="0" animate={controls1}></motion.circle>
+                    <motion.circle cx="22" cy="22" r="6" strokeOpacity="0" animate={controls2}></motion.circle>
                     <motion.circle cx="22" cy="22" r="8" animate={controls3}></motion.circle>
                 </g>
             </svg>

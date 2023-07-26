@@ -8,12 +8,16 @@ import { Uploader } from "uploader";
 import Header from "../../components/Header";
 import LoadingDots from "../../components/LoadingDots";
 import RingLoaindg from "../../components/RingLoaindg";
+import CloseIcon from '../../components/CloseIcon'; // 请将这个路径替换为你的 SVG 组件的路径
 import ResizablePanel from "../../components/ResizablePanel";
 import Toggle from "../../components/Toggle";
 import appendNewToName from "../../utils/appendNewToName";
 import downloadPhoto from "../../utils/downloadPhoto";
 import DropDown from "../../components/DropDown";
 import { roomType, rooms, themeType, themes } from "../../utils/dropdownTypes";
+import { loginUtil } from "../../utils/loginUtil";
+import Modal from 'react-modal';
+import { useEffect } from 'react';
 
 // Configuration for the uploader
 const uploader = Uploader({
@@ -52,7 +56,7 @@ const options = {
     "removed!": "removed",
     "remove": "remove",
     "skip": "Skip",
-    "unsupportedFileType": "File type not supported.",
+    "unsupportedFileType": "图片类型应为jpeg/png/jpg",
     "uploadFile": "Upload a File",
     "uploadFiles": "Upload a File",
     "uploadImage": "点击上传图片",
@@ -79,7 +83,16 @@ const options = {
 
 export default function DreamPage() {
   const [originalPhoto, setOriginalPhoto] = useState<string | null>(null);
-  const [restoredImage, setRestoredImage] = useState<string | null>(null);
+  const [picCredits, setPicCredits] = useState<number>(10);
+
+  useEffect(() => {
+    const storedValue = localStorage.getItem('picCredits');
+    if (storedValue) {
+      setPicCredits(Number(storedValue));
+    }
+  }, []);
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [restoredLoaded, setRestoredLoaded] = useState<boolean>(false);
   const [sideBySide, setSideBySide] = useState<boolean>(false);
@@ -139,29 +152,39 @@ export default function DreamPage() {
       "游戏室": "Gaming Room"
     };
 
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    setLoading(true);
-    const res = await fetch("/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl: fileUrl, theme: themStyles[label], room: roomTypes[room] }),
-    });
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      setLoading(true);
+      const res = await fetch("/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageUrl: fileUrl, theme: themStyles[label], room: roomTypes[room] }),
+      })
 
-    let newPhoto = await res.json();
-    if (res.status !== 200) {
-      setError(newPhoto);
-    } else {
-      setItems(prevItems => {
-        return prevItems.map((item, i) =>
-          item.label === label ? { ...item, restoreImageSrc: newPhoto[1] } : item
-        );
+      let newPhoto = await res.json();
+      if (res.status !== 200) {
+        setError(newPhoto);
+      } else {
+        setItems(prevItems => {
+          return prevItems.map((item, i) =>
+            item.label === label ? { ...item, restoreImageSrc: newPhoto[1] } : item
+          );
+        });
+      }
+      setTimeout(() => {
+        setLoading(false);
+      }, 1300);
+    } catch (error: unknown) {
+      setPicCredits(prevPicCredits => {
+        const newPicCredits = prevPicCredits + checkedItems.length;
+        localStorage.setItem('picCredits', newPicCredits.toString());
+        return newPicCredits;
       });
-    }
-    setTimeout(() => {
       setLoading(false);
-    }, 1300);
+      console.log('error = ', error)
+    }
   }
 
   const checkedCount = items.filter(item => item.checked).length;
@@ -201,12 +224,28 @@ export default function DreamPage() {
     }
   }
 
+  const customStyles = {
+    content: {
+      color: 'black',
+      backgroundColor: 'white',
+      width: '50%', // Set the width to 50%
+      height: '55%', // Set the height to 50%
+      margin: 'auto', // Center the modal
+    },
+    overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // 设置背景颜色
+    },
+  };
+
   return (
     <div className="flex max-w-6xl mx-auto flex-col items-center justify-center py-2 min-h-screen">
       <Header />
       <main className="flex flex-1 w-full justify-center text-center px-4 mt-4 sm:mb-0 mb-8 sm:space-x-8 space-x-0 sm:flex-row flex-col">
         <div className="sm:w-[440px] w-full flex flex-col gap-3 py-4 p-3">
-          {/* <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div> */}
+          {
+            picCredits == 0 &&
+            <div className="font-bold text-lg border rounded-lg p-3 mb-3">您的次数已耗尽。 <a className="text-blue-500" href="/buy-credits">点此购买</a> 获取更多生成次数</div>
+          }
           <div className="font-bold">
             上传一张你房间的图片
           </div>
@@ -291,6 +330,22 @@ export default function DreamPage() {
                   className="inline-flex items-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-3 font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 justify-between disabled:cursor-not-allowed false"
                   onClick={() => {
 
+                    if (picCredits <= 0) {
+                      setModalIsOpen(true)
+                      return
+                    }
+
+                    if (picCredits < checkedItems.length) {
+                      setModalIsOpen(true)
+                      return
+                    }
+
+                    const { isLogin } = loginUtil()
+                    if (!isLogin()) {
+                      window.location.href = '/login'
+                      return
+                    }
+
                     if (!originalPhoto) {
                       alert('请先上传图片')
                       return
@@ -301,8 +356,14 @@ export default function DreamPage() {
                       generatePhoto(originalPhoto, item.label as themeType)
                     }
 
+                    setPicCredits(prevPicCredits => {
+                      const newPicCredits = prevPicCredits - checkedItems.length;
+                      localStorage.setItem('picCredits', newPicCredits.toString());
+                      return newPicCredits;
+                    });
+
                   }}><span>开始设计</span></button>
-                <span className="px-2 rounded-md" aria-hidden="true">剩余 <span className="font-bold">2 张</span></span>
+                <span className="px-2 rounded-md" aria-hidden="true">剩余 <span className="font-bold">{picCredits}</span></span>
               </>
             }
 
@@ -386,6 +447,31 @@ export default function DreamPage() {
         <div style={{ position: 'fixed', zIndex: 9999, inset: '16px', pointerEvents: 'none' }}>
         </div>
       </main >
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        style={customStyles}
+        contentLabel="Example Modal"
+        ariaHideApp={false}
+      >
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+          <CloseIcon
+            onClick={() => setModalIsOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              cursor: 'pointer'
+            }} // 将关闭图标定位到模态对话框的右上角
+          />
+          <h2>请联系商务咨询购买次数，能享受更多折扣哦</h2>
+          <Image alt="logo" loading="lazy" width="350" height="474" decoding="async" data-nimg="1"
+            src="/business.png"
+            style={{ width: "auto", height: "auto" }}
+            fill={false} // 如果你在使用 Next.js，你可以添加这个属性
+          />
+        </div>
+      </Modal>
     </div >
   );
 }
